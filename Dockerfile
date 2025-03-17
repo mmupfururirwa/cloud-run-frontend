@@ -17,29 +17,30 @@
 FROM node:18 AS build
 
 WORKDIR /app
-
 COPY package*.json ./
 RUN npm install
-
 COPY . .
 RUN npm run build:ssr
 
-# Stage 2: Serve with Nginx + Node
-FROM nginx:latest
+# Stage 2: Serve with Nginx + Node.js
+FROM nginx:1.27
 
 # Copy Nginx config
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Copy built Angular static files
+# Copy static Angular files to Nginx
 COPY --from=build /app/dist/device-app/browser /usr/share/nginx/html
 
-# Copy Node SSR files
+# Copy server bundle
 COPY --from=build /app/dist/device-app/server /app/server
 
-# Install Node for SSR
-RUN apt update && apt install -y nodejs npm
+# Copy package.json & install server dependencies
+COPY package*.json /app/server/
 WORKDIR /app/server
-RUN npm install express
+RUN npm install
 
-# Start both Nginx & Node
-CMD node server.mjs
+# Expose ports
+EXPOSE 8080 4000
+
+# Start Node.js server
+CMD ["sh", "-c", "node server.mjs & nginx -g 'daemon off;'"]
