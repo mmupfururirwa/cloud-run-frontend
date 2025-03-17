@@ -12,7 +12,7 @@ import { HttpClientModule } from '@angular/common/http';
   templateUrl: './app.component.html',
 })
 export class AppComponent implements OnInit {
-  cloudRunAPI: string = '';
+  cloudRunAPI: string = 'https://smart-view-ums-api-dev.europe-west3.internal.run.app';
   loginForm: FormGroup;
   userId: string = '';
   accessToken: string = '';
@@ -43,7 +43,7 @@ export class AppComponent implements OnInit {
     this.errorMessage = '';
     this.successMessage = '';
   
-    this.http.post<any>(this.cloudRunAPI + '/api/auth/login/', { 
+    this.http.post<any>(this.cloudRunAPI + '/auth/login/', { 
         payload: {
           email: email, 
           password: password,
@@ -67,7 +67,7 @@ export class AppComponent implements OnInit {
 
   getDevices() {
     this.devicesLoading = true;
-    this.http.post<any>(this.cloudRunAPI + '/api/utilities/devices/', { 
+    this.http.post<any>(this.cloudRunAPI + '/utilities/devices/', { 
         payload: {
           userID: this.userId
         }
