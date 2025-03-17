@@ -14,6 +14,9 @@ const browserDistFolder = resolve(serverDistFolder, '../browser');
 const app = express();
 const angularApp = new AngularNodeAppEngine();
 
+// ✅ Parse JSON bodies
+app.use(express.json()); 
+
 // ✅ 1. Proxy API route FIRST
 /**
  * 🔥 Backend Proxy Route: Catch any `/api/*` calls
@@ -26,6 +29,7 @@ app.use('/api/*', async (req, res) => {
     const backendURL = backendBaseURL + req.originalUrl.replace('/api', '');
 
     console.log(`Proxying request to backend: ${backendURL}`);
+    console.log(`Proxying request to body:`, req.body);
 
     const backendResponse = await fetch(backendURL, {
       method: req.method,
@@ -35,7 +39,7 @@ app.use('/api/*', async (req, res) => {
       },
       body: ['GET', 'HEAD'].includes(req.method) ? undefined : JSON.stringify(req.body),
     });
-
+    
     const data = await backendResponse.text();
     console.log(`✅ Backend responded with status: ${backendResponse.status}`);
     res.status(backendResponse.status).send(data);
