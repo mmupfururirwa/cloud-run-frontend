@@ -7,6 +7,7 @@ import {
 import express from 'express';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import https from 'https';
 
 const serverDistFolder = dirname(fileURLToPath(import.meta.url));
 const browserDistFolder = resolve(serverDistFolder, '../browser');
@@ -14,15 +15,13 @@ const browserDistFolder = resolve(serverDistFolder, '../browser');
 const app = express();
 const angularApp = new AngularNodeAppEngine();
 
-// ✅ Parse JSON bodies
-app.use(express.json()); 
+// ✅ Parse JSON request bodies
+app.use(express.json());
 
 // ✅ 1. Proxy API route FIRST
-/**
- * 🔥 Backend Proxy Route: Catch any `/api/*` calls
- */
 app.use('/api/*', async (req, res) => {
-  delete req.headers.cookie; // 🔥 Strip cookies from SSR
+  delete req.headers.cookie; // Strip SSR cookies to avoid huge headers
+  console.log(`Proxying to internal backend`);
   console.log(`🚀 Proxy route hit: ${req.method} ${req.originalUrl}`);
 
   try {
@@ -30,30 +29,46 @@ app.use('/api/*', async (req, res) => {
     const backendURL = backendBaseURL + req.originalUrl.replace('/api', '');
 
     console.log(`Proxying request to backend: ${backendURL}`);
-    console.log(`Proxying request to body:`, req.body);
+    console.log(`Proxying request body:`, req.body);
 
-    const backendResponse = await fetch(backendURL, {
+    const requestOptions: https.RequestOptions = {
       method: req.method,
       headers: {
         'Content-Type': 'application/json',
         ...(req.headers['authorization'] ? { 'Authorization': req.headers['authorization'] } : {}),
       },
-      body: ['GET', 'HEAD'].includes(req.method) ? undefined : JSON.stringify(req.body),
+      rejectUnauthorized: false, // ⚠️ For internal requests only
+    };
+
+    const backendReq = https.request(backendURL, requestOptions, (backendRes) => {
+      let data = '';
+      backendRes.on('data', (chunk) => {
+        data += chunk;
+      });
+
+      backendRes.on('end', () => {
+        console.log(`✅ Backend responded with status: ${backendRes.statusCode}`);
+        res.status(backendRes.statusCode || 500).send(data);
+      });
     });
-    
-    const data = await backendResponse.text();
-    console.log(`✅ Backend responded with status: ${backendResponse.status}`);
-    res.status(backendResponse.status).send(data);
+
+    backendReq.on('error', (err) => {
+      console.error('❌ Proxy error:', err);
+      res.status(500).send('Backend proxy failed.');
+    });
+
+    if (!['GET', 'HEAD'].includes(req.method)) {
+      backendReq.write(JSON.stringify(req.body));
+    }
+
+    backendReq.end();
   } catch (err) {
     console.error('❌ Proxy error:', err);
     res.status(500).send('Backend proxy failed.');
   }
 });
 
-// ✅ 2. Static files
-/**
- * Serve static files from /browser
- */
+// ✅ 2. Serve static Angular browser files
 app.use(
   express.static(browserDistFolder, {
     maxAge: '1y',
@@ -62,10 +77,7 @@ app.use(
   }),
 );
 
-// ✅ 3. Angular SSR wildcard handler LAST
-/**
- * Handle all other requests by rendering the Angular application.
- */
+// ✅ 3. Handle all other requests via Angular SSR
 app.use('/**', (req, res, next) => {
   angularApp
     .handle(req)
@@ -75,9 +87,7 @@ app.use('/**', (req, res, next) => {
     .catch(next);
 });
 
-/**
- * Start the server if this module is the main entry point.
- */
+// ✅ 4. Start Express server
 if (isMainModule(import.meta.url)) {
   const port = process.env['PORT'] || 4000;
   app.listen(port, () => {
@@ -85,7 +95,5 @@ if (isMainModule(import.meta.url)) {
   });
 }
 
-/**
- * Request handler used by the Angular CLI (for dev-server and during build).
- */
+// ✅ 5. Export for Angular CLI (SSR build)
 export const reqHandler = createNodeRequestHandler(app);
