@@ -17,6 +17,11 @@ const angularApp = new AngularNodeAppEngine();
 // ✅ Parse JSON bodies
 app.use(express.json()); 
 
+const port = process.env['PORT'] || 4000;
+app.listen(port, () => {
+  console.log(`Node Express server listening on http://localhost:${port}`);
+});
+
 // ✅ 1. Proxy API route FIRST
 /**
  * 🔥 Backend Proxy Route: Catch any `/api/*` calls
