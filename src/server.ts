@@ -22,6 +22,7 @@ app.use(express.json());
  * 🔥 Backend Proxy Route: Catch any `/api/*` calls
  */
 app.use('/api/*', async (req, res) => {
+  delete req.headers.cookie; // 🔥 Strip cookies from SSR
   console.log(`🚀 Proxy route hit: ${req.method} ${req.originalUrl}`);
 
   try {
