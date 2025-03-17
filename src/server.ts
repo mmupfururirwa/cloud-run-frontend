@@ -14,6 +14,7 @@ const browserDistFolder = resolve(serverDistFolder, '../browser');
 const app = express();
 const angularApp = new AngularNodeAppEngine();
 
+// ✅ 1. Proxy API route FIRST
 /**
  * 🔥 Backend Proxy Route: Catch any `/api/*` calls
  */
@@ -35,12 +36,16 @@ app.use('/api/*', async (req, res) => {
 
     const data = await backendResponse.text();
     res.status(backendResponse.status).send(data);
+
+    console.error('Proxy request data:', data);
+    console.error('Proxy request res:', res);
   } catch (err) {
     console.error('Proxy error:', err);
     res.status(500).send('Backend proxy failed.');
   }
 });
 
+// ✅ 2. Static files
 /**
  * Serve static files from /browser
  */
@@ -52,6 +57,7 @@ app.use(
   }),
 );
 
+// ✅ 3. Angular SSR wildcard handler LAST
 /**
  * Handle all other requests by rendering the Angular application.
  */

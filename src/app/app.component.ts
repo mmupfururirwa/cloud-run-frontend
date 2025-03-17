@@ -12,7 +12,7 @@ import { HttpClientModule } from '@angular/common/http';
   templateUrl: './app.component.html',
 })
 export class AppComponent implements OnInit {
-  cloudRunAPI: string = 'https://smart-view-ums-api-dev-426000542377.europe-west3.run.app';
+  cloudRunAPI: string = '';
   loginForm: FormGroup;
   userId: string = '';
   accessToken: string = '';
