@@ -13,7 +13,7 @@ import { HttpClientModule } from '@angular/common/http';
 })
 
 export class AppComponent implements OnInit {
-  cloudRunAPI: string = '';
+  cloudRunAPI: string = '/api';
   loginForm: FormGroup;
   userId: string = '';
   accessToken: string = '';
