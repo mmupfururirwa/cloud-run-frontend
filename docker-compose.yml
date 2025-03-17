@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  node-ssr:
+    build:
+      context: .
+      dockerfile: Dockerfile.node
+    ports:
+      - "4000:4000"
+
+  nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx
+    ports:
+      - "8080:8080"
+    depends_on:
+      - node-ssr
