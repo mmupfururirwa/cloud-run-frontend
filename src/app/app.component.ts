@@ -11,6 +11,7 @@ import { HttpClientModule } from '@angular/common/http';
   imports: [CommonModule, ReactiveFormsModule, HttpClientModule], // ADD THIS
   templateUrl: './app.component.html',
 })
+
 export class AppComponent implements OnInit {
   cloudRunAPI: string = 'https://smart-view-ums-api-dev.europe-west3.internal.run.app';
   loginForm: FormGroup;
