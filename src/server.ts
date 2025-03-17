@@ -50,7 +50,6 @@ app.use('/api/*', async (req, res) => {
 
       backendRes.on('end', () => {
         console.log(`✅ Backend responded with status: ${backendRes.statusCode}`);
-        console.log('✅ Backend response:', backendRes);
         res.status(backendRes.statusCode || 500).send(data);
       });
     });
