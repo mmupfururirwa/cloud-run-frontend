@@ -42,7 +42,7 @@ export class AppComponent implements OnInit {
     this.errorMessage = '';
     this.successMessage = '';
   
-    this.http.post<any>('https://smart-view-ums-api-dev-6bsov2mz7q-ey.a.run.internal/auth/login/', { 
+    this.http.post<any>('https://smart-view-ums-api-dev-426000542377.europe-west3.run.app/auth/login/', { 
         payload: {
           email: email, 
           password: password,
@@ -66,7 +66,7 @@ export class AppComponent implements OnInit {
 
   getDevices() {
     this.devicesLoading = true;
-    this.http.post<any>('https://smart-view-ums-api-dev-6bsov2mz7q-ey.a.run.internal/utilities/devices/', { 
+    this.http.post<any>('https://smart-view-ums-api-dev-426000542377.europe-west3.run.app/utilities/devices/', { 
         payload: {
           userID: this.userId
         }
