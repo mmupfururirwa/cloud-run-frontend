@@ -19,6 +19,8 @@ const angularApp = new AngularNodeAppEngine();
  * 🔥 Backend Proxy Route: Catch any `/api/*` calls
  */
 app.use('/api/*', async (req, res) => {
+  console.log(`🚀 Proxy route hit: ${req.method} ${req.originalUrl}`);
+
   try {
     const backendBaseURL = 'https://smart-view-ums-api-dev-426000542377.europe-west3.run.app';
     const backendURL = backendBaseURL + req.originalUrl.replace('/api', '');
@@ -35,12 +37,10 @@ app.use('/api/*', async (req, res) => {
     });
 
     const data = await backendResponse.text();
+    console.log(`✅ Backend responded with status: ${backendResponse.status}`);
     res.status(backendResponse.status).send(data);
-
-    console.error('Proxy request data:', data);
-    console.error('Proxy request res:', res);
   } catch (err) {
-    console.error('Proxy error:', err);
+    console.error('❌ Proxy error:', err);
     res.status(500).send('Backend proxy failed.');
   }
 });
