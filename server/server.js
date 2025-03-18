@@ -4,17 +4,20 @@ const axios = require('axios');
 const app = express();
 
 const PORT = process.env.PORT || 8080;
+const BACKEND_URL = process.env.BACKEND_URL || 'http://smart-view-ums-api-dev:8080'; // Local test
 
-// === Config Backend Internal URL ===
-const BACKEND_INTERNAL_URL = 'http://smart-view-ums-api-dev:8080'; // Cloud Run service name resolves internally
+console.log(`Using Backend URL: ${BACKEND_URL}`);
 
+// === 1. Serve Angular static files ===
+const angularDistFolder = path.join(__dirname, '../dist/device-app/browser');
+app.use(express.static(angularDistFolder));
+
+// === 2. Proxy API Routes ===
 app.use(express.json());
-app.use(express.static(path.join(__dirname, '../dist'))); // Serve Angular
 
-// Proxy login request
 app.post('/api/auth/login', async (req, res) => {
   try {
-    const response = await axios.post(`${BACKEND_INTERNAL_URL}/auth/login/`, {
+    const response = await axios.post(`${BACKEND_URL}/auth/login/`, {
       payload: req.body
     });
     res.json(response.data);
@@ -24,11 +27,10 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
-// Proxy getDevices request
-app.post('/api/utilities/devices', async (req, res) => {
+app.post('/api/auth/devices', async (req, res) => {
   try {
     const token = req.headers['authorization'] || '';
-    const response = await axios.post(`${BACKEND_INTERNAL_URL}/utilities/devices/`, 
+    const response = await axios.post(`${BACKEND_URL}/utilities/devices/`, 
       { payload: req.body },
       { headers: { Authorization: token } }
     );
@@ -39,11 +41,12 @@ app.post('/api/utilities/devices', async (req, res) => {
   }
 });
 
-// Serve index.html for Angular routing
+// === 3. Serve Angular index.html ===
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../dist/index.html'));
+  res.sendFile(path.join(angularDistFolder, 'index.html'));
 });
 
+// === Start Server ===
 app.listen(PORT, () => {
-  console.log(`Server listening on port ${PORT}`);
+  console.log(`Proxy + Angular running at http://localhost:${PORT}`);
 });
