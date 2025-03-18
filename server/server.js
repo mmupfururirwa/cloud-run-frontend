@@ -27,7 +27,7 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
-app.post('/api/auth/devices', async (req, res) => {
+app.post('/api/utilities/devices', async (req, res) => {
   try {
     const token = req.headers['authorization'] || '';
     const response = await axios.post(`${BACKEND_URL}/utilities/devices/`, 
