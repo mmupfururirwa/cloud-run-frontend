@@ -27,7 +27,7 @@ app.use('/api/*', async (req, res) => {
   console.log(`🚀 Proxy route hit: ${req.method} ${req.originalUrl}`);
 
   try {
-    const backendBaseURL = 'https://smart-view-ums-api-dev-6bsov2mz7q-ey.a.run.app';
+    const backendBaseURL = 'https://smart-view-ums-api-dev-426000542377.europe-west3.internal.run.app';
     const backendURL = backendBaseURL + req.originalUrl.replace('/api', '');
 
     console.log(`Proxying request to backend: ${backendURL}`);
