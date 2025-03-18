@@ -17,9 +17,8 @@ app.use(express.json());
 
 app.post('/api/auth/login', async (req, res) => {
   try {
-    const response = await axios.post(`${BACKEND_URL}/auth/login/`, {
-      payload: req.body
-    });
+    console.info('Proxy login body:', req.body);
+    const response = await axios.post(`${BACKEND_URL}/auth/login/`, req.body);
     res.json(response.data);
   } catch (error) {
     console.error('Proxy login error:', error.message);
@@ -30,8 +29,7 @@ app.post('/api/auth/login', async (req, res) => {
 app.post('/api/utilities/devices', async (req, res) => {
   try {
     const token = req.headers['authorization'] || '';
-    const response = await axios.post(`${BACKEND_URL}/utilities/devices/`, 
-      { payload: req.body },
+    const response = await axios.post(`${BACKEND_URL}/utilities/devices/`, req.body,
       { headers: { Authorization: token } }
     );
     res.json(response.data);
