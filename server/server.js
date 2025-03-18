@@ -4,7 +4,7 @@ const axios = require('axios');
 const app = express();
 
 const PORT = process.env.PORT || 8080;
-const BACKEND_URL = process.env.BACKEND_URL || 'http://smart-view-ums-api-dev:8080'; // Local test
+const BACKEND_URL = process.env.BACKEND_URL || 'https://smart-view-ums-api-dev-6bsov2mz7q-ey.a.run.app'; // Update with your backend URL
 
 console.log(`Using Backend URL: ${BACKEND_URL}`);
 
