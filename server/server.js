@@ -33,7 +33,7 @@ app.post('/api/auth/register', async (req, res) => {
     res.json(response.data);
   } catch (error) {
     console.error('Proxy register error:', error.message);
-    console.error('Proxy register message:', error);
+    console.error('Proxy register message:', error.response.data);
     res.status(500).json({ message: 'Register failed', error: error.message });
   }
 });
