@@ -10,11 +10,13 @@ import { HttpClientModule } from '@angular/common/http';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, HttpClientModule], // ADD THIS
   templateUrl: './app.component.html',
+  styleUrls: ['./app.component.sass'] 
 })
 
 export class AppComponent implements OnInit {
   cloudRunAPI: string = '/api'; // https://smart-view-ums-api-dev-6bsov2mz7q-ey.a.run.app
   loginForm: FormGroup;
+  registerForm: FormGroup;
   userId: string = '';
   accessToken: string = '';
   devices: any[] = [];
@@ -27,15 +29,66 @@ export class AppComponent implements OnInit {
   errorMessage: string = '';
   loading: boolean = false;
   devicesLoading: boolean = false;
+  showRegisterForm: boolean = false;
 
   constructor(private fb: FormBuilder, private http: HttpClient) {
     this.loginForm = this.fb.group({
       email: ['', Validators.required],
       password: ['', Validators.required],
     });
+    this.registerForm = this.fb.group({
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', Validators.required],
+      confirmPassword: ['', Validators.required],
+      firstName: ['', Validators.required],
+      lastName: ['', Validators.required]
+    });
+    
   }
 
   ngOnInit() {}
+
+  register() {
+    const { email, password, confirmPassword, firstName, lastName } = this.registerForm.value;
+  
+    // Optional: Simple password confirmation check
+    if (password !== confirmPassword) {
+      this.errorMessage = 'Passwords do not match.';
+      return;
+    }
+  
+    this.loading = true;
+    this.errorMessage = '';
+    this.successMessage = '';
+  
+    this.http.post<any>(this.cloudRunAPI + '/auth/register/', { 
+        payload: {
+          email: email,
+          password: password,
+          c_password: password,
+          firstName: firstName,
+          lastName: lastName,
+          phone: '0673680477',
+          companyName: 'Demo Test Company',
+          provider: 'email_password'
+        }
+      })
+      .subscribe(response => {
+        console.log('Register response:', response);
+        this.loading = false;
+        this.successMessage = 'Registration successful! You can now log in.';
+
+        this.showRegisterForm = false;
+        this.userId = response.data.userID; // Adjust according to actual API response
+        this.accessToken = response.data.access.access_token; // Adjust according to actual API response
+        this.getDevices();
+      }, error => {
+        this.loading = false;
+        this.errorMessage = 'Registration failed. Please try again.';
+        console.error('Register error:', error);
+      });
+  }
+  
 
   login() {
     const { email, password } = this.loginForm.value;
