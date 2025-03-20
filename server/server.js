@@ -26,6 +26,17 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
+app.post('/api/auth/register', async (req, res) => {
+  try {
+    console.info('Proxy register body:', req.body);
+    const response = await axios.post(`${BACKEND_URL}/auth/register/`, req.body);
+    res.json(response.data);
+  } catch (error) {
+    console.error('Proxy register error:', error.message);
+    res.status(500).json({ message: 'Register failed', error: error.message });
+  }
+});
+
 app.post('/api/utilities/devices', async (req, res) => {
   try {
     const token = req.headers['authorization'] || '';
