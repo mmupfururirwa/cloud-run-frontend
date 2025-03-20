@@ -41,7 +41,10 @@ app.post('/api/auth/register', async (req, res) => {
 app.post('/api/wallet/payfast/initiate_payfast_topup', async (req, res) => {
   try {
     console.info('Proxy initiate payfast topup body:', req.body);
-    const response = await axios.post(`${BACKEND_URL}/wallet/payfast/initiate_payfast_topup`, req.body);
+    const token = req.headers['authorization'] || '';
+    const response = await axios.post(`${BACKEND_URL}/wallet/payfast/initiate_payfast_topup`, req.body,
+      { headers: { Authorization: token } }
+    );
     res.json(response.data);
   } catch (error) {
     console.error('Proxy initiate payfast topup error:', error.message);
