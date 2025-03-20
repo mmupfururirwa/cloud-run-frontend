@@ -29,7 +29,9 @@ export class AppComponent implements OnInit {
   errorMessage: string = '';
   loading: boolean = false;
   devicesLoading: boolean = false;
+  paymentLoading: boolean = false;
   showRegisterForm: boolean = false;
+  redirect_url: string = '';
 
   constructor(private fb: FormBuilder, private http: HttpClient) {
     this.loginForm = this.fb.group({
@@ -88,6 +90,37 @@ export class AppComponent implements OnInit {
         console.error('Register error:', error);
       });
   }
+
+  processPayFastPayment() {
+    this.paymentLoading = true;
+    this.http.post<any>(this.cloudRunAPI + '/wallet/payfast/initiate_payfast_topup', { 
+        payload: {
+          userID: this.userId,
+          meteringPointID: 2097,
+          amount: 100
+        }
+      },
+      { headers: 
+        {
+          'content-type': 'application/json',
+          Authorization: 'Bearer ' + this.accessToken,
+        } 
+      })
+      .subscribe(response => {
+        console.log('PayFast TopUp response:', response);
+        this.devicesLoading = false;
+        this.redirect_url = response.data.redirect_url; 
+        // open new window to PayFast
+        const newWindow = window.open(this.redirect_url, '_blank');
+        if (newWindow) {
+          newWindow.focus();
+        }
+      }, error => {
+        this.devicesLoading = false;
+        this.errorMessage = 'Failed to fetch PayFast TopUp';
+        console.error('PayFast TopUp error:', error);
+      });
+  }
   
 
   login() {
@@ -138,6 +171,8 @@ export class AppComponent implements OnInit {
         this.devices = response.data.devices; // Adjust based on response
         this.totalDevices = response.data.total;
         this.currentPage = 1;
+
+        this.processPayFastPayment();
       }, error => {
         this.devicesLoading = false;
         this.errorMessage = 'Failed to fetch devices.';

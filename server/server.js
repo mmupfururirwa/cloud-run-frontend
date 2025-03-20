@@ -38,6 +38,28 @@ app.post('/api/auth/register', async (req, res) => {
   }
 });
 
+app.post('/api/wallet/payfast/initiate_payfast_topup', async (req, res) => {
+  try {
+    console.info('Proxy initiate payfast topup body:', req.body);
+    const response = await axios.post(`${BACKEND_URL}/wallet/payfast initiate_payfast_topup`, req.body);
+    res.json(response.data);
+  } catch (error) {
+    console.error('Proxy initiate payfast topup error:', error.message);
+    res.status(500).json({ message: 'Initiate payfast topup failed', error: error.message });
+  }
+});
+
+app.post('/api/wallet/payfast_notify', async (req, res) => {
+  try {
+    console.info('Proxy payfast notify body:', req.body);
+    const response = await axios.post(`${BACKEND_URL}/wallet/payfast_notify`, req.body);
+    res.json(response.data);
+  } catch (error) {
+    console.error('Proxy payfast notify error:', error.message);
+    res.status(500).json({ message: 'Payfast notify failed', error: error.message });
+  }
+});
+
 app.post('/api/utilities/devices', async (req, res) => {
   try {
     const token = req.headers['authorization'] || '';
